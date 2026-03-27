@@ -1,0 +1,26 @@
+{
+  "id": "foundry-sports",
+  "title": "Foundry Sports",
+  "description": "Additional SFX for Dice So Nice.",
+  "authors": [
+    {
+      "name": "okatbest"
+    }
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ],
+  "version": "0.0.1",
+  "manifest": "https://github.com/IvanMathy/foundry-sports/releases/latest/download/module.json",
+  "download": "https://github.com/IvanMathy/foundry-sports/releases/download/1.0.0/module.zip",
+  "compatibility": {
+    "minimum": "11",
+    "verified": "13"
+  },
+  "esmodules": ["src/main.js"],
+  "socket": true
+}
