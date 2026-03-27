@@ -3,11 +3,6 @@
   "version": "1.0.0",
   "description": "Additional special effects for Dice So Nice",
   "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
-  },
   "author": "OKatBest",
   "license": "MIT"
 }
