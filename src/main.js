@@ -3,7 +3,8 @@ import { TestEffect } from "./TestEffect.js";
 Hooks.once("diceSoNiceReady", (dsn) => {
   dsn.addSFXMode(TestEffect);
 
-  setTimeout(test, 1000);
+  // setTimeout(test, 1000);
+  test();
 });
 
 function test() {

@@ -14,6 +14,9 @@ export class TestEffect extends DiceSFX {
 
   static backgroundPlane = null;
 
+  barsTime = 2;
+  barsCount = 4;
+
   static async init() {
     const geometry = new PlaneGeometry(1, 1);
     const material = new MeshBasicMaterial({});
@@ -22,35 +25,59 @@ export class TestEffect extends DiceSFX {
 
   async play() {
     this.clock = new Clock();
-    this.plane = TestEffect.backgroundPlane.clone();
-    this.plane.receiveShadow = this.box.shadows;
 
-    this.plane.position.x = 0;
-    this.plane.position.y = 0;
-    this.plane.position.z = 1;
-    this.plane.rotation.z = 0;
-    this.box.scene.add(this.plane);
+    this.bars = [];
 
     this.box.desk.geometry.computeBoundingBox();
+    this.maxX = this.box.desk.geometry.boundingBox.max.x;
 
-    this.plane.scale.set(
-      this.box.desk.geometry.boundingBox.max.x * 0.8,
-      this.box.desk.geometry.boundingBox.max.y * 0.8,
-      1,
-    );
+    let height = this.box.desk.geometry.boundingBox.max.y * 0.05;
+
+    for (let i = 0; i < this.barsCount; i++) {
+      let bar = TestEffect.backgroundPlane.clone();
+      bar.receiveShadow = false;
+
+      bar.scale.set(this.box.desk.geometry.boundingBox.max.x, height, 1);
+
+      bar.position.z = 1;
+      bar.position.y = i * height;
+
+      this.box.scene.add(bar);
+
+      this.bars.push(bar);
+    }
 
     this.dicemesh.position.z -= 1;
     this.renderReady = true;
+  }
 
-    console.log(this.box);
+  easeOutCubic(x) {
+    return 1 - Math.pow(1 - x, 3);
+  }
+
+  lerp(a, b, t) {
+    return a + (b - a) * t;
   }
 
   render() {
-    this.plane.position.x = this.clock.getElapsedTime() * 10;
+    const t = this.clock.getElapsedTime();
+    if (t < this.barsTime + 1) {
+      const bt = t / this.barsTime;
+      for (let i = 0; i < this.barsCount; i++) {
+        this.bars[i].position.x =
+          this.lerp(
+            this.maxX,
+            0,
+            this.easeOutCubic(Math.min(1, bt - Math.abs(i - 1.5) / 4)),
+          ) * (i % 2 == 0 ? 1 : -1);
+      }
 
-    if (this.clock.getElapsedTime() > 5) {
-      // this.destroy();
+      this.plane;
     }
+
+    // if ( > 5) {
+    //   // this.destroy();
+    // }
   }
 
   destroy() {
