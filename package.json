@@ -9,11 +9,5 @@
     "preview": "vite preview"
   },
   "author": "OKatBest",
-  "license": "MIT",
-  "devDependencies": {
-    "fvtt-types": "github:League-of-Foundry-Developers/foundry-vtt-types#main",
-    "typescript": "~5.9.3",
-    "vite": "^7.2.4",
-    "vite-plugin-fvtt": "^0.2.10"
-  }
+  "license": "MIT"
 }
