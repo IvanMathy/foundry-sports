@@ -1,12 +1,8 @@
-import { TestEffect } from "./TestEffect.js";
+import { Nat20Effect } from "./Nat20Effect.js";
 
 Hooks.once("diceSoNiceReady", (dsn) => {
-  dsn.addSFXMode(TestEffect);
-
-  console.log(dsn);
-
-  // setTimeout(test, 1000);
-  test();
+  dsn.addSFXMode(Nat20Effect);
+  // test();
 });
 
 function test() {

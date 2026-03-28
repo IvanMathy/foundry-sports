@@ -6,29 +6,27 @@ import {
   Clock,
   MeshMatcapMaterial,
   TextureLoader,
+  Object3D,
 } from "../../dice-so-nice/libs/three.module.min.js";
 import { FontLoader } from "./lib/FontLoader.js";
 import { TextGeometry } from "./lib/TextGeometry.js";
-export class TestEffect extends DiceSFX {
-  static id = "FoundrySports";
+export class Nat20Effect extends DiceSFX {
+  static id = "FoundrySportsNat20";
   static specialEffectName = "Animation: Foundry Sports";
 
   static PLAY_ONLY_ONCE_PER_MESH = true;
 
-  static backgroundPlane = null;
-
   barsTime = 2;
   textInTime = 4;
   barsCount = 4;
+  barsDelay = 0.2;
 
-  static async init() {
-    const geometry = new PlaneGeometry(1, 1);
-    const material = new MeshBasicMaterial({});
-    TestEffect.backgroundPlane = new Mesh(geometry, material);
-  }
+  static async init() {}
 
   async play() {
     this.clock = new Clock();
+
+    this.barsContainer = new Object3D();
 
     this.bars = [];
 
@@ -36,25 +34,28 @@ export class TestEffect extends DiceSFX {
     this.maxX = this.box.desk.geometry.boundingBox.max.x;
     this.maxY = this.box.desk.geometry.boundingBox.max.y;
 
-    let height = this.box.desk.geometry.boundingBox.max.y * 0.05;
+    let height = this.box.desk.geometry.boundingBox.max.y * 0.03;
+
+    const geometry = new PlaneGeometry(1, 1);
+    const material = new MeshBasicMaterial({});
 
     for (let i = 0; i < this.barsCount; i++) {
-      let bar = TestEffect.backgroundPlane.clone();
+      let bar = new Mesh(geometry, material);
       bar.receiveShadow = false;
 
       bar.scale.set(this.box.desk.geometry.boundingBox.max.x, height, 1);
 
-      bar.position.z = 1;
-      bar.position.y = i * height;
+      bar.position.z = 0;
+      bar.position.y = (i - 1.5) * height - height / 2;
       bar.position.x = this.maxX;
 
-      this.box.scene.add(bar);
+      this.barsContainer.add(bar);
       this.bars.push(bar);
     }
 
-    this.dicemesh.position.z -= 1;
-
     this.loadFont();
+
+    this.box.scene.add(this.barsContainer);
   }
 
   easeOutCubic(x) {
@@ -132,8 +133,8 @@ export class TestEffect extends DiceSFX {
     this.d20Mesh = new Mesh(d20, this.materials[1]);
 
     textMesh1.position.x = centerOffset;
-    textMesh1.position.y = -verticalCenter;
-    textMesh1.position.z = 0;
+    textMesh1.position.y = verticalCenter;
+    textMesh1.position.z = 250;
 
     // Jank
     this.targetTextPosition = textMesh1.position.clone();
@@ -146,7 +147,6 @@ export class TestEffect extends DiceSFX {
     textMesh1.rotation.x = 0;
     textMesh1.rotation.y = Math.PI * 2;
 
-    this.box.scene.add(textMesh1);
     this.textMesh = textMesh1;
 
     this.textMesh.add(this.d20Mesh);
@@ -164,6 +164,8 @@ export class TestEffect extends DiceSFX {
     );
 
     this.renderReady = true;
+
+    this.box.scene.add(this.textMesh);
   }
 
   render() {
@@ -174,8 +176,8 @@ export class TestEffect extends DiceSFX {
     this.d20Mesh.rotation.y = -t * 2;
     this.otherd20.rotation.y = t * 2;
 
-    if (t < this.barsTime + 1) {
-      const bt = t / this.barsTime;
+    if (t < this.barsTime + 1 + this.barsDelay) {
+      const bt = t / this.barsTime - this.barsDelay;
       for (let i = 0; i < this.barsCount; i++) {
         this.bars[i].position.x =
           this.lerp(
@@ -184,8 +186,6 @@ export class TestEffect extends DiceSFX {
             this.easeOutCubic(Math.min(1, bt - Math.abs(i - 1.5) / 4)),
           ) * (i % 2 == 0 ? 1 : -1);
       }
-
-      this.plane;
     }
 
     if (t < this.textInTime) {
@@ -218,10 +218,16 @@ export class TestEffect extends DiceSFX {
             ),
           ) * (i % 2 == 0 ? 1 : -1);
       }
+
+      this.textMesh.rotation.x = this.lerp(
+        0,
+        10,
+        this.easeInBack(Math.max(0, tl - 0.25)),
+      );
       this.textMesh.position.y = this.lerp(
         this.targetTextPosition.y,
         -this.maxY,
-        this.easeInBack(tl),
+        this.easeInBack(Math.max(0, tl - 0.25)),
       );
     }
 
@@ -231,7 +237,8 @@ export class TestEffect extends DiceSFX {
   }
 
   destroy() {
-    this.box.scene.remove(this.plane);
+    this.box.scene.remove(this.textMesh);
+    this.box.scene.remove(this.barsContainer);
     this.destroyed = true;
   }
 }
