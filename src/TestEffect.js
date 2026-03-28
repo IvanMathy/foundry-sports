@@ -5,14 +5,10 @@ import {
   Mesh,
   Clock,
   MeshMatcapMaterial,
-  DirectionalLight,
-  Object3D,
   TextureLoader,
 } from "../../dice-so-nice/libs/three.module.min.js";
 import { FontLoader } from "./lib/FontLoader.js";
 import { TextGeometry } from "./lib/TextGeometry.js";
-import { USDLoader } from "./lib/USDLoader.js";
-
 export class TestEffect extends DiceSFX {
   static id = "FoundrySports";
   static specialEffectName = "Animation: Foundry Sports";
@@ -89,21 +85,11 @@ export class TestEffect extends DiceSFX {
       bevelEnabled = true;
     const depth = 20,
       size = 70,
-      hover = 0,
       curveSegments = 10,
       bevelThickness = 10,
       bevelSize = 10;
 
     const loader = new TextureLoader();
-
-    const usdLoader = new USDLoader();
-
-    const diceScene = await usdLoader.loadAsync(
-      "/modules/foundry-sports/src/assets/dice.usdc",
-    );
-
-    this.dice = diceScene.getObjectByName("defaultMaterial_002", true);
-    //   .getObjectByName("defaultMaterial", true);
 
     this.gold = await loader.loadAsync(
       "/modules/foundry-sports/src/assets/matcap.png",
@@ -119,8 +105,6 @@ export class TestEffect extends DiceSFX {
         flatShading: false,
       }),
     ];
-
-    this.dice.material = this.materials[1];
 
     this.textGeo = new TextGeometry(text, {
       font: font,
@@ -144,6 +128,9 @@ export class TestEffect extends DiceSFX {
 
     let textMesh1 = new Mesh(this.textGeo, this.materials);
 
+    let d20 = await this.box.dicefactory.createGeometry("d20", 2, 40);
+    this.d20Mesh = new Mesh(d20, this.materials[1]);
+
     textMesh1.position.x = centerOffset;
     textMesh1.position.y = -verticalCenter;
     textMesh1.position.z = 0;
@@ -162,19 +149,19 @@ export class TestEffect extends DiceSFX {
     this.box.scene.add(textMesh1);
     this.textMesh = textMesh1;
 
-    this.textMesh.add(diceScene);
+    this.textMesh.add(this.d20Mesh);
 
-    diceScene.scale.set(300, 300, 300);
-    diceScene.position.set(
+    this.d20Mesh.position.set(centerOffset * 0.3, -verticalCenter * 0.8, 0);
+
+    this.otherd20 = this.d20Mesh.clone();
+
+    this.textMesh.add(this.otherd20);
+
+    this.otherd20.position.set(
       -centerOffset * 2 - centerOffset * 0.2,
       -verticalCenter * 0.8,
       0,
     );
-
-    const otherDice = diceScene.clone();
-
-    diceScene.position.x = centerOffset * 0.3;
-    this.textMesh.add(otherDice);
 
     this.renderReady = true;
   }
@@ -183,6 +170,10 @@ export class TestEffect extends DiceSFX {
     if (!this.renderReady) return;
 
     const t = this.clock.getElapsedTime();
+
+    this.d20Mesh.rotation.y = -t * 2;
+    this.otherd20.rotation.y = t * 2;
+
     if (t < this.barsTime + 1) {
       const bt = t / this.barsTime;
       for (let i = 0; i < this.barsCount; i++) {
@@ -196,12 +187,6 @@ export class TestEffect extends DiceSFX {
 
       this.plane;
     }
-
-    this.gold.rotation = t;
-    this.gold.offset.x = t;
-    this.materials[1].matcap = this.gold;
-
-    // this.dice.rotation.x = this.lerp(t);
 
     if (t < this.textInTime) {
       const tt = this.easeOutCubic(t / this.textInTime);
@@ -220,8 +205,8 @@ export class TestEffect extends DiceSFX {
       this.textMesh.rotation.x = this.lerp(-1, 0, tt);
     }
 
-    if (t > this.textInTime + 1) {
-      const tl = t - this.textInTime - 1;
+    if (t > this.textInTime) {
+      const tl = t - this.textInTime;
 
       for (let i = 0; i < this.barsCount; i++) {
         this.bars[i].position.x =
@@ -235,7 +220,7 @@ export class TestEffect extends DiceSFX {
       }
       this.textMesh.position.y = this.lerp(
         this.targetTextPosition.y,
-        -this.maxY * 1.1,
+        -this.maxY,
         this.easeInBack(tl),
       );
     }
@@ -243,10 +228,6 @@ export class TestEffect extends DiceSFX {
     if (t > this.textInTime + 2) {
       this.destroy();
     }
-
-    // if ( > 5) {
-    //   // this.destroy();
-    // }
   }
 
   destroy() {

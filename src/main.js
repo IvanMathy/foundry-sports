@@ -3,6 +3,8 @@ import { TestEffect } from "./TestEffect.js";
 Hooks.once("diceSoNiceReady", (dsn) => {
   dsn.addSFXMode(TestEffect);
 
+  console.log(dsn);
+
   // setTimeout(test, 1000);
   test();
 });
@@ -13,9 +15,9 @@ function test() {
       {
         dice: [
           {
-            result: 2,
-            resultLabel: 2,
-            type: "d2",
+            result: 20,
+            resultLabel: 20,
+            type: "d20",
             vectors: [],
             options: {},
           },
